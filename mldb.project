@@ -92,13 +92,13 @@
   </Settings>
   <VirtualDirectory Name="src">
     <File Name="main.cpp"/>
-    <File Name="Index.h"/>
-    <File Name="Index.cpp"/>
-    <File Name="VStore.h"/>
-    <File Name="VStore.cpp"/>
-    <File Name="FreePool.h"/>
-    <File Name="FreePool.cpp"/>
-    <File Name="MLDB.h"/>
-    <File Name="MLDB.cpp"/>
+    <File Name="index.h"/>
+    <File Name="index.cpp"/>
+    <File Name="vstore.h"/>
+    <File Name="vstore.cpp"/>
+    <File Name="freepool.h"/>
+    <File Name="freepool.cpp"/>
+    <File Name="mldb.h"/>
+    <File Name="mldb.cpp"/>
   </VirtualDirectory>
 </CodeLite_Project>

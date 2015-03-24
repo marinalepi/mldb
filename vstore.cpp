@@ -1,4 +1,4 @@
-#include "VStore.h"
+#include "vstore.h"
 
 namespace mldb
 {

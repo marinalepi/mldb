@@ -1,4 +1,4 @@
-#include "Index.h"
+#include "index.h"
 
 namespace mldb
 {

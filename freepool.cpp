@@ -1,4 +1,4 @@
-#include "FreePool.h"
+#include "freepool.h"
 
 namespace mldb
 {
