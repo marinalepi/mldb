@@ -1,32 +1,60 @@
 #ifndef INDEX_H
 #define INDEX_H
 
-#include "../aatree.h"
+using namespace std;
 
 namespace mldb
 {
 
-/*This class stores key->location pair in the AATree
- * 
- * */
 class Index
 {
-	AATree *tree;
+	string path;
+	string prefix;
+
+	typedef struct TreeData {
+		AATree *tree;
+		BloomFilter *filter;
+		unsigned int nodeCount;
+		TreeData() : tree(NULL), filter(NULL), nodeCount(0) {};
+		~TreeData() {
+			if (tree) {
+				delete tree;
+			}
+			if (filter) {
+				delete filter;
+			}
+		}
+		static TreeData* create ();
+	} TreeData;
+	// Cache
+	string filePath;	
+	TreeData *cache;
+
+	map<string, TreeData*> index;
+	createDataElement foo;
+	
+	vector<string> scanPath();
+	int readFilterData(const char *fileName, TreeData* &d);
+	int fetchTree();
+	int saveTree();
+	void updateFilter(AADataBase* data);
+	int add(AADataBase* data);
+	int treeToCache(string name, TreeData *d);
+	string nextFilename();
+	
 public:
-	Index();
+	Index(createDataElement =  createAADataBase);
 	~Index();
 
-	// read tree from disk
-	int Load();
-	// save tree to disk
-	int Save();
-	// flush tree to disk
-	int Flush();
-	// insert a new key->location pair
-	int Insert(unsigned char key, unsigned long long location);
-	// get location for the key
-	unsigned long long Get(unsigned char key);
-	int Remove(unsigned char key);
+	// scan the path, finds the prefix files, initializes the index
+	int Init(const char *path, const char *prefix);
+	// remove index, delete files if needed
+	int Destroy(bool removeFiles);
+	// add index data
+	int Add(AADataBase* data);
+	// get index data
+	int Get(AADataBase* &data);
+	int Delete(AADataBase* data);
 };
 
 }
