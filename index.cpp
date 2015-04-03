@@ -25,8 +25,6 @@ Index::~Index() {
 
 // scan the path, finds the prefix files, initializes the index
 int Index::Init(const char *path, const char *prefix) {
-	// init tree and filter
-	this->cache = NULL;
 	// save path and prefix
 	this->path = path;
 	this->prefix = prefix;
@@ -42,6 +40,18 @@ int Index::Init(const char *path, const char *prefix) {
 		}
 		// save that index map: filename -> file data(tree & filter)
 		index[files[i]] = d;
+	}
+	if (index.size() == 0) { // empty path
+		// create new data
+		TreeData *d = TreeData::create();
+		if (!d) {
+			return ENOMEM;
+		}
+		int result;
+		if ((result = treeToCache(nextFilename(), d)) != 0) {
+			delete d;
+			return result;
+		}
 	}
 	return 0;
 }
@@ -60,6 +70,7 @@ int Index::Destroy(bool removeFiles) {
 	// clear map;
 	this->index.clear();
 	this->cache = NULL;
+	this->filePath.clear();
 	return 0;
 }
 
@@ -67,15 +78,14 @@ int Index::Destroy(bool removeFiles) {
 int Index::Add(AADataBase* data) {
 	int result;
 	
-	// check if the data can be added to the cached tree
-	if (this->cache && this->cache->nodeCount < MAXNUM_TREENODES) {
-		result = add(data);
-	} else {
-		if ((result = fetchTree()) == 0) {
-			result = add(data);
-		}
+	// add data to the current tree
+	if ((result = add(data)) != 0) {
+		return result;
 	}
-	return result;
+	if (this->cache->nodeCount > MAXNUM_TREENODES) {
+		return fetchTree();
+	}
+	return 0;
 }
 
 // get index data
@@ -85,7 +95,7 @@ int Index::Get(AADataBase* &data) {
 	
 	const AATreeNode *foundNode = NULL;
 	// if cache -> first check if data can be in the cache
-	if (this->cache && this->cache->filter->Check(bytes, size)) {
+	if (this->cache->filter->Check(bytes, size)) {
 		foundNode = this->cache->tree->get(data);
 	}
 	for (std::map<string, TreeData*>::iterator it = this->index.begin(); !foundNode && it != this->index.end(); ++it) {
@@ -325,9 +335,8 @@ int exists(string name) {
 
 int Index::treeToCache(string name, TreeData *d) {
 	// unload tree
-	if (this->cache) {
-		this->cache->tree->erase();
-	}
+	this->cache->tree->erase();
+
 	// check if file exists
 	if (exists(name)) {
 		ifstream f;

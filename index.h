@@ -54,6 +54,10 @@ public:
 	int Add(AADataBase* data);
 	// get index data
 	int Get(AADataBase* &data);
+	// get current index filename
+	const char * GetCurrentFilename() const {
+		return filePath.c_str();
+	}
 	int Delete(AADataBase* data);
 };
 
